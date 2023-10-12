@@ -18,3 +18,4 @@ google.generativeai==0.2.1
 
 # load url
 Selenium
+unstructured
