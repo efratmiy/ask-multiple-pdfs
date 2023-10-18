@@ -1,26 +1,14 @@
 import streamlit as st
-from dotenv import load_dotenv
 from PyPDF2 import PdfReader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
+from dotenv import load_dotenv
 from langchain.chains import ConversationalRetrievalChain
-from langchain.document_loaders import UnstructuredURLLoader
-from htmlTemplates import css, bot_template, user_template
+from langchain.chat_models import ChatOpenAI
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.memory import ConversationBufferMemory
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.vectorstores import FAISS
 
-from langchain.llms import HuggingFaceHub
-import google.generativeai as palm
-import os
-# from utils import get_api_key
-# from google.api_core import client_options as client_options_lib
-#
-# palm.configure(api_key=os.environ["PALM_API_KEY"])
-# models = [m for m in palm.list_models()
-#           if 'generateMessage'
-#           in m.supported_generation_methods]
-# model_bison = models[0]
+from htmlTemplates import css, bot_template, user_template
 
 
 def get_pdf_text(pdf_docs):
@@ -45,15 +33,13 @@ def get_text_chunks(text):
 
 def get_vectorstore(text_chunks):
     embeddings = OpenAIEmbeddings()
-    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
     vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore
 
 
 def get_conversation_chain(vectorstore):
     llm = ChatOpenAI(model_name="gpt-4", temperature=1)
-    # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": 1})
-    # llm = model_bison
+
 
     memory = ConversationBufferMemory(
         memory_key='chat_history', return_messages=True)
