@@ -15,12 +15,12 @@ import google.generativeai as palm
 import os
 # from utils import get_api_key
 # from google.api_core import client_options as client_options_lib
-
-palm.configure(api_key=os.environ["PALM_API_KEY"])
-models = [m for m in palm.list_models()
-          if 'generateMessage'
-          in m.supported_generation_methods]
-model_bison = models[0]
+#
+# palm.configure(api_key=os.environ["PALM_API_KEY"])
+# models = [m for m in palm.list_models()
+#           if 'generateMessage'
+#           in m.supported_generation_methods]
+# model_bison = models[0]
 
 
 def get_pdf_text(pdf_docs):
