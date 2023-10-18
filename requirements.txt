@@ -1,4 +1,4 @@
-langchain==0.0.184
+langchain==0.0.316
 PyPDF2==3.0.1
 python-dotenv==1.0.0
 streamlit~=1.26.0
@@ -19,3 +19,5 @@ google.generativeai==0.2.1
 # load url
 Selenium
 unstructured
+requests~=2.31.0
+beautifulsoup4~=4.12.2
