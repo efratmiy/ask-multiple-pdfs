@@ -10,6 +10,12 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.document_loaders import SeleniumURLLoader
 from htmlTemplates import css, bot_template, user_template
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from typing import List
+from time import sleep
+import time
+from selenium.webdriver.common.keys import Keys
 
 
 def get_pdf_text(pdf_docs):
@@ -19,6 +25,39 @@ def get_pdf_text(pdf_docs):
         for page in pdf_reader.pages:
             text += page.extract_text()
     return text
+
+
+# def scrape_webpage(url_list: List[str]):
+#     """ Function to extract the body text of a list of web pages """
+#
+#     # Define webdriver options
+#     options = webdriver.ChromeOptions()
+#     options.add_argument('--headless')
+#
+#     # Initialize the Chrome webdriver
+#     driver = webdriver.Chrome(options=options)
+#     # Scroll down
+#     driver.find_element_by_tag_name('body').send_keys(Keys.PAGE_DOWN)
+#     time.sleep(2)  # Allow time for content to load
+#     if type(url_list) is not list:
+#         url_list = url_list.split('\n')
+#
+#     for url in url_list:
+#         try:
+#             # Open the URL
+#             driver.get(url)
+#             # Give some time to load the page and run JavaScript
+#             sleep(5)
+#             # Parse the page source through BeautifulSoup
+#             soup = BeautifulSoup(driver.page_source, 'html.parser')
+#
+#             # Extracts all tags and joins them.
+#             body_text = '\n'.join([tag.get_text(strip=True) for tag in soup.find_all()])
+#
+#             return body_text
+#
+#         except Exception as e:
+#             print(f'Failed to scrape webpage {url}. Error: {str(e)}')
 
 
 def get_url_text(urls):
@@ -94,11 +133,12 @@ def main():
 
     with st.sidebar:
         st.subheader("Your documents")
-        txt = st.text_area(label="past your URLs here and click on 'Process'")
+        urls = st.text_area(label="past your URLs here and click on 'Process'")
         if st.button("Process"):
             with st.spinner("Processing"):
-                # get pdf text
-                raw_text = get_url_text(txt)
+                # get  text
+                # raw_text = scrape_webpage(urls)
+                raw_text = get_url_text(urls)
 
                 # get the text chunks
                 text_chunks = get_text_chunks(raw_text)
