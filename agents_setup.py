@@ -89,7 +89,20 @@ def agent_define():
     
     6. when using the tool csv_agent, the action should be a normal sentence that explains the query needed, and not the actual query. 
     
-    7. the quetions and the answers will be in hebrew only
+    7. the questions the search words in the action and the answers will be in hebrew only. for example:
+        user: כמה עולה חגורה?
+        > Entering new AgentExecutor chain...
+            thought: I need to find the price of a belt in the product list.
+            Action: csv_agent
+            Action Input: I need the prices of all the products with the word "חגורה" in "שם" or "תאור קצר".
+            Observation:The prices of all the products with the word "חגורה" in their name or description are as follows:
+            Some of the belt prices are missing, but most of them range from 50 to 119 shekels.
+            Final Answer: המחיר של חגורות נע בין 50 ל-119 שקלים
+            > Finished chain.
+
+
+
+            
     
     Previous conversation history:
     {history}
