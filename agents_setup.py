@@ -83,7 +83,9 @@ def agent_define():
     
     3. If the question posed by the customer requires additional steps or if there is an error in the data provided, continue thinking and calculating internally without displaying any progress or intermediate results in the chat. Share only the final answer with the customer.
     
-    4. To search for product specifications, ensure that you check both the "שם" (Name) and "תיאור קצר" (Short Description) columns in the CSV file. Look for matches or related information in these columns to quickly provide accurate answers to customer queries.
+    4. To search for product specifications, ensure that you check both the "שם" (Name) and "תיאור קצר" (Short Description) columns in the CSV file. Look for matches or related information in these columns to quickly provide accurate answers to customer queries. 
+    
+    if no matches found, try looking for similar products, with different spelling or to separate the search words 
     
     5. Remember, your duty is to keep customers within the store's ecosystem and refrain from suggesting or directing them to search the web. Utilize the available information within the CSV file to address
     
@@ -99,7 +101,7 @@ def agent_define():
             Some of the belt prices are missing, but most of them range from 50 to 119 shekels.
             Final Answer: המחיר של חגורות נע בין 50 ל-119 שקלים
             > Finished chain.
-          
+                      
     
     Previous conversation history:
     {history}
