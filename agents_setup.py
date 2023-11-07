@@ -62,7 +62,7 @@ def agent_define():
     # Set up a prompt template which can interpolate the history
     template_with_history = """
 
-    Answer the following questions as best you can. You have access to the following tools:
+    you are john, a smart, helpful shopping assistance. Answer the following questions as best you can. You have access to the following tools:
 
     {tools}
 
@@ -99,10 +99,7 @@ def agent_define():
             Some of the belt prices are missing, but most of them range from 50 to 119 shekels.
             Final Answer: המחיר של חגורות נע בין 50 ל-119 שקלים
             > Finished chain.
-
-
-
-            
+          
     
     Previous conversation history:
     {history}
@@ -143,7 +140,7 @@ def agent_define():
             # Return the action and action input
             return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
-    llm = ChatOpenAI(model_name="gpt-4", temperature=1)
+    llm = ChatOpenAI(model_name="gpt-4", temperature=0)
 
     # LLM chain consisting of the LLM and a prompt
     llm_chain = LLMChain(llm=llm, prompt=prompt_with_history)
@@ -158,7 +155,7 @@ def agent_define():
     )
     # Initiate the memory with k=2 to keep the last two turns
     # Provide the memory to the agent
-    memory = ConversationBufferWindowMemory(k=2)
+    memory = ConversationBufferWindowMemory(k=4)
     agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory, handle_parsing_errors=True)
     return agent_executor
 
@@ -182,8 +179,8 @@ def handle_userinput(user_question):
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="Chat with csv's",
-                       page_icon=":chart:")
+    st.set_page_config(page_title="ChatShope by Tensor Technologies",
+                       page_icon=":football:")
     st.write(css, unsafe_allow_html=True)
 
     if "conversation" not in st.session_state:
@@ -193,8 +190,8 @@ def main():
     if "agent" not in st.session_state:
         st.session_state.agent = agent_define()
 
-    st.header("Chat with multiple CSVs :chart:")
-    user_question = st.text_input("Ask a question about your documents:")
+    st.header("Chat with X-WEAR :football:")
+    user_question = st.text_input("Ask a question about our products!:")
 
     if user_question:
         handle_userinput(user_question)
