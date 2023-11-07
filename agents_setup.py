@@ -3,14 +3,16 @@ from typing import List, Union
 
 import streamlit as st
 from dotenv import load_dotenv
-from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser
+from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser, load_tools
 from langchain.agents import create_csv_agent
 from langchain.agents.agent_types import AgentType
 from langchain.chains.llm import LLMChain
 from langchain.chat_models import ChatOpenAI
+from langchain.llms.openai import OpenAI
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import BaseChatPromptTemplate
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
+from langchain.tools.plugin import AIPluginTool
 
 from htmlTemplates import css, bot_template, user_template
 
@@ -22,11 +24,14 @@ def agent_define():
         verbose=True,
         agent_type=AgentType.OPENAI_FUNCTIONS,
     )
+    # tool = AIPluginTool.from_plugin_url("https://www.klarna.com/.well-known/ai-plugin.json")
+
+
     tools = [
-        Tool.from_function(
+        Tool(
             name="csv_agent",
             func=csv_agent.run,
-            description="useful for when you need to answer questions about csv files"
+            description="useful for when you need to answer questions about products in the store"
         )
     ]
 
@@ -37,7 +42,7 @@ def agent_define():
         # The list of tools available
         tools: List[Tool]
 
-        def format_messages(self, **kwargs) :
+        def format_messages(self, **kwargs):
             # Get the intermediate steps (AgentAction, Observation tuples)
             # Format them in a particular way
             intermediate_steps = kwargs.pop("intermediate_steps")
@@ -56,17 +61,8 @@ def agent_define():
 
     # Set up a prompt template which can interpolate the history
     template_with_history = """
-1. Ensure you have a CSV file containing the product information for the store. This file should include columns such as "שם" (Name) and "תיאור קצר" (Short Description), among others.
 
-2. Your primary task is to assist customers in finding the products they are seeking. Engage in conversation with them and ask for specific details about the product they want, such as its name, description, or any other relevant information.
-
-3. If the question posed by the customer requires additional steps or if there is an error in the data provided, continue thinking and calculating internally without displaying any progress or intermediate results in the chat. Share only the final answer with the customer.
-
-4. To search for product specifications, ensure that you check both the "שם" (Name) and "תיאור קצר" (Short Description) columns in the CSV file. Look for matches or related information in these columns to quickly provide accurate answers to customer queries.
-
-5. Remember, your duty is to keep customers within the store's ecosystem and refrain from suggesting or directing them to search the web. Utilize the available information within the CSV file to address
-
-6. Answer the following questions as best you can. You have access to the following tools:
+    Answer the following questions as best you can. You have access to the following tools:
 
     {tools}
 
@@ -81,8 +77,20 @@ def agent_define():
     Thought: I now know the final answer
     Final Answer: the final answer to the original input question
 
-    Begin! Remember to give detailed, informative answers
-
+    1. ensure you have a tool named csv_agent that contains a df of data about products in a sport store 
+    
+    2. Your primary task is to assist customers in finding the products they are seeking. Engage in conversation with them and ask for specific details about the product they want, such as its name, description, or any other relevant information.
+    
+    3. If the question posed by the customer requires additional steps or if there is an error in the data provided, continue thinking and calculating internally without displaying any progress or intermediate results in the chat. Share only the final answer with the customer.
+    
+    4. To search for product specifications, ensure that you check both the "שם" (Name) and "תיאור קצר" (Short Description) columns in the CSV file. Look for matches or related information in these columns to quickly provide accurate answers to customer queries.
+    
+    5. Remember, your duty is to keep customers within the store's ecosystem and refrain from suggesting or directing them to search the web. Utilize the available information within the CSV file to address
+    
+    6. when using the tool csv_agent, the action should be a normal sentence that explains the query needed, and not the actual query. 
+    
+    7. the quetions and the answers will be in hebrew only
+    
     Previous conversation history:
     {history}
 
@@ -91,7 +99,7 @@ def agent_define():
 
     prompt_with_history = CustomPromptTemplate(
         template=template_with_history,
-        tools=[],
+        tools=tools,
         input_variables=["input", "intermediate_steps", "history"]
     )
 
@@ -144,17 +152,19 @@ def agent_define():
 
 def handle_userinput(user_question):
     agent = st.session_state.agent
+    st.session_state.chat_history.append(user_question)
+
     intermediate_steps = None
     response = agent.run({'history': st.session_state.chat_history, 'input': user_question})
-    st.session_state.chat_history = response
+    st.session_state.chat_history.append(response)
 
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
             st.write(user_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
+                "{{MSG}}", message), unsafe_allow_html=True)
         else:
             st.write(bot_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
+                "{{MSG}}", message), unsafe_allow_html=True)
 
 
 def main():
@@ -166,7 +176,7 @@ def main():
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
     if "chat_history" not in st.session_state:
-        st.session_state.chat_history = None
+        st.session_state.chat_history = []
     if "agent" not in st.session_state:
         st.session_state.agent = agent_define()
 
