@@ -18,15 +18,16 @@ from htmlTemplates import css, bot_template, user_template
 
 
 def agent_define():
+    """from openAI cookbook: https://cookbook.openai.com/examples/how_to_build_a_tool-using_agent_with_langchain"""
+
+    # setup csv agent
     csv_agent = create_csv_agent(
         ChatOpenAI(temperature=0),
         'wc-product-export-21-10-2023-1697892104000 (1).csv',
         verbose=True,
         agent_type=AgentType.OPENAI_FUNCTIONS,
     )
-    # tool = AIPluginTool.from_plugin_url("https://www.klarna.com/.well-known/ai-plugin.json")
-
-
+    # create tool list
     tools = [
         Tool(
             name="csv_agent",
@@ -115,6 +116,7 @@ def agent_define():
         input_variables=["input", "intermediate_steps", "history"]
     )
 
+    # setup reply format (did not change)
     class CustomOutputParser(AgentOutputParser):
 
         def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
@@ -142,6 +144,7 @@ def agent_define():
             # Return the action and action input
             return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
+    # setup the chat agent
     llm = ChatOpenAI(model_name="gpt-4", temperature=0)
 
     # LLM chain consisting of the LLM and a prompt
@@ -155,7 +158,7 @@ def agent_define():
         stop=["\nObservation:"],
         allowed_tools=tool_names
     )
-    # Initiate the memory with k=2 to keep the last two turns
+    # Initiate the memory with k=4 to keep the last two turns
     # Provide the memory to the agent
     memory = ConversationBufferWindowMemory(k=4)
     agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory, handle_parsing_errors=True)
@@ -166,7 +169,6 @@ def handle_userinput(user_question):
     agent = st.session_state.agent
     st.session_state.chat_history.append(user_question)
 
-    intermediate_steps = None
     response = agent.run({'history': st.session_state.chat_history, 'input': user_question})
     st.session_state.chat_history.append(response)
 
